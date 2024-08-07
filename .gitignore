@@ -1,4 +1,5 @@
 .~*.xlsx
 .~*.xls
 **/__pycache__
-./temp/**
+temp/**
+cache/*

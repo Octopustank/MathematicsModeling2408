@@ -1,14 +1,36 @@
 import pandas as pd
 from datetime import datetime
+import os
 
-def read_raw_data(file_path: str) -> pd.DataFrame:
+PATH = os.path.dirname(os.path.abspath(__file__))
+CACHE = os.path.join(PATH, 'cache')
+DATA = os.path.join(PATH, 'data')
+TRACE_TABLE = os.path.join(DATA, 'track_table')
+
+def read_raw_data(file_name: str) -> pd.DataFrame:
     """
     读取原始数据文件，返回 DataFrame
     param
-    - file_path: 文件路径
+    - file_name: xlsx文件名
     return
     - DataFrame
     """
+
+    file_path = os.path.join(TRACE_TABLE, file_name)
+
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File {file_path} not found")
+    if not file_path.endswith('.xlsx'):
+        raise ValueError(f"File {file_path} is not a xlsx file")
+
+    # 判断缓存文件
+    cache_file_name = ".".join([os.path.splitext(file_name)[0], 'csv'])
+    cache_file = os.path.join(CACHE, cache_file_name)
+    if not os.path.exists(CACHE):
+        os.makedirs(CACHE)
+    if os.path.exists(cache_file): # 有缓存文件，直接读取
+        return pd.read_csv(cache_file)
+
     df = pd.read_excel(file_path)
 
     # 初始化结果列表
@@ -39,9 +61,9 @@ def read_raw_data(file_path: str) -> pd.DataFrame:
 
     # 创建 DataFrame
     result_df = pd.DataFrame(results, columns=['车辆编号', '车型', '轨迹编号', '事件', '时间', '发生地点'])
+    result_df.to_csv(cache_file, index=False)
     return result_df
 
 if __name__ == '__main__':
-    result_df = read_raw_data('./data/轨迹表1.xlsx')
+    result_df = read_raw_data("轨迹表1.xlsx")
     print(result_df.head())
-    result_df.to_csv('./result.csv', index=False)
