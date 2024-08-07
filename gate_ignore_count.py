@@ -1,10 +1,8 @@
 import pandas as pd
-
 import dataLoader
 
-# 读取数据
 dfs = []
-for i in range(1, 2):
+for i in range(1, 31):
     dfs.append(dataLoader.read_raw_data(f"轨迹表{i}.xlsx"))
 df = pd.concat(dfs, ignore_index=True)
 
