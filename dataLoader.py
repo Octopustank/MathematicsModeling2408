@@ -75,7 +75,7 @@ def read_raw_data(file_name: str, chache=True) -> pd.DataFrame:
             else: cnt += 1
             track_temp = []
             
-        if (current_track is not None):
+        if (current_track is not None): # 只有读取到了轨迹信息才会进行数据处理，规避了轨迹编号缺失的情况（否则会受先前的影响）
             # 读取数据行信息
             event = row['信息类型'].replace('门架信息', '门架')
             location = row['收费站/门架编号'] if row['收费站/门架编号'] != '其他' else None

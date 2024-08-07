@@ -1,3 +1,6 @@
+"""
+统计门架忽略与正常计数的数据
+"""
 import pandas as pd
 
 df = pd.read_csv('./doc/总_门架忽略与正常计数.csv')

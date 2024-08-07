@@ -1,3 +1,7 @@
+"""
+用于检查车辆行程，探究数目不匹配的原因
+结果：发现了存在轨迹编号缺失的情况，需要处理，进而修改了dataLoader.py中的read_raw_data函数
+"""
 import pandas as pd
 import dataLoader
 
@@ -17,4 +21,4 @@ unique_combinations = df['组合编号'].unique()
 unique_combinations_df = pd.DataFrame(unique_combinations, columns=['组合编号'])
 unique_combinations_df.to_csv('unique_combinations.csv', index=False)
 
-print("不同的组合编号已输出到 unique_combinations.csv 文件中")
+print("over.")

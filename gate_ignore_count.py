@@ -1,3 +1,6 @@
+"""
+统计门架漏失/正常统计结果的各项数据
+"""
 import pandas as pd
 import dataLoader
 

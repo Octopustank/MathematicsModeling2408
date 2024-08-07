@@ -1,3 +1,6 @@
+"""
+绘制车辆通过门架的时间、位置、数量信息的三维分布图
+"""
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
