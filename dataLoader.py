@@ -12,7 +12,7 @@ CACHE = os.path.join(PATH, 'cache')
 DATA = os.path.join(PATH, 'data')
 TRACE_TABLE = os.path.join(DATA, 'track_table')
 
-def read_raw_data(file_name: str) -> pd.DataFrame:
+def read_raw_data(file_name: str, chache=True) -> pd.DataFrame:
     """
     读取原始数据文件，返回 DataFrame。如果已经存在缓存文件，则直接读取缓存文件。
 
@@ -36,7 +36,7 @@ def read_raw_data(file_name: str) -> pd.DataFrame:
     cache_file = os.path.join(CACHE, cache_file_name)
     if not os.path.exists(CACHE):
         os.makedirs(CACHE)
-    if os.path.exists(cache_file): # 有缓存文件，直接读取
+    if os.path.exists(cache_file) and chache: # 有缓存文件，直接读取
         print("Cache found, using cache.")
         return pd.read_csv(cache_file)
 
@@ -45,11 +45,14 @@ def read_raw_data(file_name: str) -> pd.DataFrame:
 
     # 初始化结果列表
     results = []
+    track_temp = []
 
     # 临时变量存储当前车辆信息，用于解析数据块
     current_vehicle = None
     current_model = None
     current_track = None
+
+    cnt = 0
 
     # 遍历每一行
     for index, row in df.iterrows():
@@ -57,17 +60,39 @@ def read_raw_data(file_name: str) -> pd.DataFrame:
             # 处理数据块的第一行
             current_vehicle = row['车辆编号']
             current_model = row['收费站/门架编号'].split('：')[1]  # 提取车型
+            current_track = None
             continue  # 跳过数据块的第一行
         if pd.notna(row['轨迹编号']): # 刷新轨迹编号
             current_track = row['轨迹编号']
-        # 读取数据行信息
-        event = row['信息类型'].replace('门架信息', '门架')
-        location = row['收费站/门架编号'] if row['收费站/门架编号'] != '其他' else None
-        time = row['记录时间'] if row['记录时间'] != '——' else None
-        if time: # 转换时间格式为时间戳
-            time = datetime.strptime(time, '%d/%m/%Y %H:%M:%S').timestamp()
-        
-        results.append([current_vehicle, current_model, current_track, event, time, location])
+
+            time_items = [item[4] for item in track_temp if item[4] is not None]
+            time_max = max(time_items) if len(time_items) > 0 else 0
+            time_min = min(time_items) if len(time_items) > 0 else 0
+            if len(track_temp) > 0 and\
+                time_max <= datetime.strptime("2022-02-27 23:59:59", "%Y-%m-%d %H:%M:%S").timestamp() and\
+                time_min >= datetime.strptime("2022-02-22 0:0:0", "%Y-%m-%d %H:%M:%S").timestamp(): # 有效数据
+                results.extend(track_temp)
+            else: cnt += 1
+            track_temp = []
+            
+        if (current_track is not None):
+            # 读取数据行信息
+            event = row['信息类型'].replace('门架信息', '门架')
+            location = row['收费站/门架编号'] if row['收费站/门架编号'] != '其他' else None
+            time = row['记录时间'] if row['记录时间'] != '——' else None
+            if time: # 转换时间格式为时间戳
+                time = datetime.strptime(time, '%d/%m/%Y %H:%M:%S').timestamp()
+            track_temp.append([current_vehicle, current_model, current_track, event, time, location])
+
+    time_items = [item[4] for item in track_temp if item[4] is not None]
+    time_max = max(time_items) if len(time_items) > 0 else 0
+    if len(track_temp) > 0 and\
+        time_max <= datetime.strptime("2022-02-27 23:59:59", "%Y-%m-%d %H:%M:%S").timestamp() and\
+        time_min >= datetime.strptime("2022-02-22 0:0:0", "%Y-%m-%d %H:%M:%S").timestamp(): # 有效数据
+        results.extend(track_temp)
+    else: cnt += 1
+
+    track_temp = []
 
     # 创建 DataFrame
     result_df = pd.DataFrame(results, columns=['车辆编号', '车型', '轨迹编号', '事件', '时间', '发生地点'])
@@ -95,7 +120,7 @@ def read_location_data() -> dict:
     return location_data
 
 if __name__ == '__main__':
-    # result_df = read_raw_data("轨迹表1.xlsx")
-    # print(result_df.head())
-    location_data = read_location_data()
-    print(location_data)
+    result_df = read_raw_data("轨迹表1.xlsx", chache=False)
+    print(result_df.head())
+    # location_data = read_location_data()
+    # print(location_data)
