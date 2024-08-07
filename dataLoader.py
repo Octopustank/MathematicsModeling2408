@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime
+import json
 import os
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -10,8 +11,10 @@ TRACE_TABLE = os.path.join(DATA, 'track_table')
 def read_raw_data(file_name: str) -> pd.DataFrame:
     """
     读取原始数据文件，返回 DataFrame
+
     param
     - file_name: xlsx文件名
+
     return
     - DataFrame
     """
@@ -64,6 +67,26 @@ def read_raw_data(file_name: str) -> pd.DataFrame:
     result_df.to_csv(cache_file, index=False)
     return result_df
 
+def read_location_data() -> dict:
+    """
+    读取位置数据文件，返回字典
+    
+    return
+    - dict
+        - gate: 门架编号和位置的字典
+        - sequence: 门架和收费站的顺序列表
+    """
+
+    location_data_path = os.path.join(DATA, "location.json")
+    if not os.path.exists(location_data_path):
+        raise FileNotFoundError(f"File {location_data_path} not found")
+    with open(location_data_path, 'r', encoding="utf-8") as f:
+        location_data = json.load(f)
+
+    return location_data
+
 if __name__ == '__main__':
-    result_df = read_raw_data("轨迹表1.xlsx")
-    print(result_df.head())
+    # result_df = read_raw_data("轨迹表1.xlsx")
+    # print(result_df.head())
+    location_data = read_location_data()
+    print(location_data)
