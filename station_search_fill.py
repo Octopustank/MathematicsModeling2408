@@ -4,13 +4,12 @@
 
 import pandas as pd
 import numpy as np
-from datetime import datetime
 
 import dataLoader
 import dataOutput
 
 dfs = []
-for i in range(1, 2):
+for i in range(1, 31):
     dfs.append(dataLoader.read_raw_data(f"轨迹表{i}.xlsx"))
 df = pd.concat(dfs, ignore_index=True)
 
