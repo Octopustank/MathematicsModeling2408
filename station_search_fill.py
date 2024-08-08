@@ -9,7 +9,7 @@ import dataLoader
 import dataOutput
 
 dfs = []
-for i in range(1, 31):
+for i in range(1, 3):
     dfs.append(dataLoader.read_raw_data(f"轨迹表{i}.xlsx"))
 df = pd.concat(dfs, ignore_index=True)
 
@@ -23,6 +23,7 @@ speed = 120 / 3.6
 
 entry_results = []
 
+print("begin to search missing enrty station...")
 for index, record in bu_lu_ru_zhan_records.iterrows():
     vehicle_id = record['车辆编号']
     track_id = record['轨迹编号']
@@ -68,12 +69,14 @@ for index, record in bu_lu_ru_zhan_records.iterrows():
         '轨迹编号': track_id,
         '可能的收费站': possible_station
     })
-
+print("search missing enrty station done.")
 df_gatesearch = pd.DataFrame(entry_results)
 dataOutput.dump(df_gatesearch, 'enrty_search.csv')
 
 # 确定“补录出站”的收费站
 exit_results = []
+
+print("begin to search missing exit station...")
 for vehicle_id, track_id in df[['车辆编号', '轨迹编号']].drop_duplicates().values:
     # 获取该行程的所有记录
     trip_records = df[(df['车辆编号'] == vehicle_id) & (df['轨迹编号'] == track_id)]
@@ -102,6 +105,7 @@ for vehicle_id, track_id in df[['车辆编号', '轨迹编号']].drop_duplicates
         '轨迹编号': track_id,
         '可能的收费站': next_station
     })
+print("search missing exit station done.")
 
 # 将 exit_results 列表保存到 exit_search.csv 文件中
 df_exitsearch = pd.DataFrame(exit_results)
@@ -115,6 +119,7 @@ exit_dict = {(result['车辆编号'], result['轨迹编号']): result['可能的
 deleted_trips_count = 0
 
 # 遍历每一个行程，修补“发生地点”
+print("begin to fill missing station...")
 for vehicle_id, track_id in df[['车辆编号', '轨迹编号']].drop_duplicates().values:
     trip_key = (vehicle_id, track_id)
     
@@ -134,6 +139,7 @@ for vehicle_id, track_id in df[['车辆编号', '轨迹编号']].drop_duplicates
         # 修补“补录出站”的“发生地点”
         if needs_exit_fix and trip_key in exit_dict:
             df.loc[(df['车辆编号'] == vehicle_id) & (df['轨迹编号'] == track_id) & (df['事件'] == '补录出站'), '发生地点'] = exit_dict[trip_key]
+print("fill missing station done.")
 
 dataOutput.dump(df, 'filled_data.csv')
 remained_cnt = len(df[['车辆编号', '轨迹编号']].drop_duplicates())
