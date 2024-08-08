@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import datetime
 import json
 import os
+import sys
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 CACHE = os.path.join(PATH, 'cache')
@@ -18,6 +19,7 @@ def read_raw_data(file_name: str, chache=True) -> pd.DataFrame:
 
     param
     - file_name: xlsx文件名
+    - chache: 是否使用缓存，默认为True
 
     return
     - DataFrame
@@ -100,6 +102,10 @@ def read_raw_data(file_name: str, chache=True) -> pd.DataFrame:
     print("Done.")
     return result_df
 
+def load_cache() -> None:
+    for i in range(1, 31):
+        read_raw_data(f"轨迹表{i}.xlsx", chache=False)
+
 def read_location_data() -> dict:
     """
     读取位置数据文件，返回字典
@@ -120,6 +126,10 @@ def read_location_data() -> dict:
     return location_data
 
 if __name__ == '__main__':
+    if sys.argv[1] == 'cache': # 命令行调用重新生成缓存
+        load_cache()
+        sys.exit(0)
+
     result_df = read_raw_data("轨迹表1.xlsx", chache=False)
     print(result_df.head())
     # location_data = read_location_data()
