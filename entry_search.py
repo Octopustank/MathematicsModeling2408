@@ -5,11 +5,11 @@ from datetime import datetime
 import dataLoader
 import dataOutput
 
-# 读取数据
 dfs = []
 for i in range(1, 2):
     dfs.append(dataLoader.read_raw_data(f"轨迹表{i}.xlsx"))
 df = pd.concat(dfs, ignore_index=True)
+
 location = dataLoader.read_location_data()
 
 # 提取所有“补录入站”的记录
@@ -18,7 +18,6 @@ bu_lu_ru_zhan_records = df[df['事件'] == '补录入站']
 # 速度（米/秒）
 speed = 120 / 3.6
 
-# 结果存储
 results = []
 
 for index, record in bu_lu_ru_zhan_records.iterrows():
@@ -73,6 +72,20 @@ for result in results:
             '可能的收费站': last_station
         })
 
-# 将处理后的结果写入 CSV 文件
-df = pd.DataFrame(processed_results)
-dataOutput.dump(df, 'processed_results.csv')
+df_gatesearch = pd.DataFrame(processed_results)
+dataOutput.dump(df_gatesearch, 'processed_results.csv')
+
+# 将推测的结果填充到 df 的相应位置
+for result in results:
+    vehicle_id = result['车辆编号']
+    track_id = result['轨迹编号']
+    possible_station = result['可能的收费站']
+    if len(possible_station) == 0:
+        continue
+    else:
+        possible_station = possible_station[-1]
+    
+    # 找到对应的补录入站记录并填充
+    df.loc[(df['车辆编号'] == vehicle_id) & (df['轨迹编号'] == track_id) & (df['事件'] == '补录入站'), '发生地点'] = possible_station
+
+dataOutput.dump(df, 'filled_data.csv')
