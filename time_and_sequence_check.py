@@ -5,7 +5,7 @@ import pandas as pd
 import dataLoader
 import dataOutput
 
-source = "轨迹表1.xlsx"
+source = "轨迹表5.xlsx"
 
 df = dataLoader.read_raw_data(source)
 
@@ -42,7 +42,7 @@ abnormal_df = pd.DataFrame(abnormal_trips, columns=['车辆编号', '轨迹编�
 abnormal_counts = abnormal_df['异常类型'].value_counts()
 
 print()
-print(f"there's {len(abnormal_df)} abnormal trips in {source}")
+print(f"there's {len(abnormal_df)} abnormal trips in {source}, the rate is {len(abnormal_df) / len(grouped):.2%}(total {len(grouped)})")
 print("abnormal type:")
 print(abnormal_counts)
 print()
