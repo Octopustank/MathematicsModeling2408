@@ -103,7 +103,8 @@ for vehicle_id, track_id in df[['车辆编号', '轨迹编号']].drop_duplicates
     exit_results.append({
         '车辆编号': vehicle_id,
         '轨迹编号': track_id,
-        '可能的收费站': next_station
+        '可能的收费站': next_station,
+        '填补的时间': df[(df['车辆编号'] == vehicle_id) & (df['轨迹编号'] == track_id) & (df['事件'] == '门架')].iloc[-1]['时间']
     })
 print("search missing exit station done.")
 
@@ -113,7 +114,7 @@ dataOutput.dump(df_exitsearch, 'exit_search.csv')
 
 # 将 entry_results 和 exit_results 转换为字典，方便查找
 entry_dict = {(result['车辆编号'], result['轨迹编号']): result['可能的收费站'] for result in entry_results}
-exit_dict = {(result['车辆编号'], result['轨迹编号']): result['可能的收费站'] for result in exit_results}
+exit_dict = {(result['车辆编号'], result['轨迹编号']): (result['可能的收费站'], result['填补的时间']) for result in exit_results}
 
 # 记录删除的行程数
 deleted_trips_count = 0
@@ -138,7 +139,8 @@ for vehicle_id, track_id in df[['车辆编号', '轨迹编号']].drop_duplicates
         
         # 修补“补录出站”的“发生地点”
         if needs_exit_fix and trip_key in exit_dict:
-            df.loc[(df['车辆编号'] == vehicle_id) & (df['轨迹编号'] == track_id) & (df['事件'] == '补录出站'), '发生地点'] = exit_dict[trip_key]
+            df.loc[(df['车辆编号'] == vehicle_id) & (df['轨迹编号'] == track_id) & (df['事件'] == '补录出站'), '发生地点'] = exit_dict[trip_key][0]
+            df.loc[(df['车辆编号'] == vehicle_id) & (df['轨迹编号'] == track_id) & (df['事件'] == '补录出站'), '时间'] = exit_dict[trip_key][1]
 print("fill missing station done.")
 
 dataOutput.dump(df, 'filled_data.csv')
