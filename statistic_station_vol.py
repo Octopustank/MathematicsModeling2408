@@ -12,15 +12,15 @@ plt.rcParams['font.sans-serif'] = ['SimHei'] # 使用黑体显示中文
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['axes.unicode_minus'] = False # 正确显示负号
 
-df = pd.read_csv("./doc/表1表2-出入站补全清洗数据.csv")
+df = pd.read_csv("./doc/表1表2_出入站补全清洗数据.csv")
 location = dataLoader.read_location_data()
 gates = list(location["gate"].keys())
 stations = [one for one in location["sequence"] if one not in gates]
 
 # 生成时间区间序列
 start_time = datetime(2022, 2, 22)
-end_time = datetime(2022, 2, 27)
-time_intervals = np.linspace(start_time.timestamp(), end_time.timestamp(), num=121)  # 每小时一个区间
+end_time = datetime(2022, 2, 28)
+time_intervals = np.linspace(start_time.timestamp(), end_time.timestamp(), num=24 * 6 + 1)  # 每小时一个区间
 
 
 # 初始化结果列表
