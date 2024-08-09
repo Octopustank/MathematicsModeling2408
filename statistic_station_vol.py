@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 
 import dataLoader
+import dataOutput
 
 plt.rcParams['figure.figsize'] = (8, 6)
 plt.rcParams['axes.grid'] = False
@@ -17,9 +18,10 @@ gates = list(location["gate"].keys())
 stations = [one for one in location["sequence"] if one not in gates]
 
 # 生成时间区间序列
-start_time = 1645599600
-end_time = 1645747200
-time_intervals = np.linspace(start_time, end_time, num= 6 * 24 + 1)  # 每小时一个区间
+start_time = datetime(2022, 2, 22)
+end_time = datetime(2022, 2, 27)
+time_intervals = np.linspace(start_time.timestamp(), end_time.timestamp(), num=121)  # 每小时一个区间
+
 
 # 初始化结果列表
 results = []
@@ -35,11 +37,10 @@ for station in stations:
     entry_hist, exit_hist = [], []
     if len(entry_data['时间']) > 0:
         # 统计入站车流
-        entry_hist, _ = np.histogram(entry_data['时间'].astype(np.int64) // 10**9, bins=time_intervals)
+        entry_hist, _ = np.histogram(entry_data['时间'].astype(np.int64), bins=time_intervals)
     if len(exit_data['时间']) > 0:
         # 统计出站车流
-        print(exit_data)
-        exit_hist, _ = np.histogram(exit_data['时间'].astype(np.int64) // 10**9, bins=time_intervals)
+        exit_hist, _ = np.histogram(exit_data['时间'].astype(np.int64), bins=time_intervals)
     
     # 保存结果
     for i in range(len(time_intervals) - 1):
@@ -47,4 +48,4 @@ for station in stations:
 
 # 转换为DataFrame并保存为CSV
 result_df = pd.DataFrame(results, columns=['收费站', '时间区间起点', '入站车流', '出站车流'])
-result_df.to_csv('station_traffic_hourly.csv', index=False)
+dataOutput.dump(result_df, 'station_traffic_hourly.csv')
