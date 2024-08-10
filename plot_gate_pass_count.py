@@ -36,13 +36,12 @@ for i in range(len(df)):
 print("Done.")
 
 # 获取所有时间戳的最大值和最小值
-all_times = [time for times in pass_gate_count.values() for time in times]
-min_time = min(all_times)
-max_time = max(all_times)
-all_times = None
+# 生成时间区间序列
+start_time = datetime(2022, 2, 22)
+end_time = datetime(2022, 2, 28)
 
 # 将时间戳均分区间
-bins = np.linspace(min_time, max_time, 61)
+bins = np.linspace(start_time.timestamp(), end_time.timestamp(), num=24 * 6 + 1)
 
 # 创建三维图形对象
 fig = plt.figure()
