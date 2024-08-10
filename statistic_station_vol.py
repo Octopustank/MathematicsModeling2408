@@ -1,16 +1,13 @@
+"""
+统计逐小时收费站车流
+"""
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import dataLoader
 import dataOutput
 
-plt.rcParams['figure.figsize'] = (8, 6)
-plt.rcParams['axes.grid'] = False
-plt.rcParams['font.sans-serif'] = ['SimHei'] # 使用黑体显示中文
-plt.rcParams['font.family'] = 'sans-serif'
-plt.rcParams['axes.unicode_minus'] = False # 正确显示负号
 
 df = pd.read_csv("./doc/表1表2_出入站补全清洗数据.csv")
 location = dataLoader.read_location_data()
